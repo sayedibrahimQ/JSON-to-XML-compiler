@@ -1,0 +1,16 @@
+{ {
+" "
+string name
+" "
+: :
+" "
+string Farida
+" "
+, ,
+" "
+string age
+" "
+: :
+number 22
+} }
+ACCEPTED
