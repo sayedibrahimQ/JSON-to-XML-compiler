@@ -1,0 +1,14 @@
+# depslib dependency file v1.0
+1755718034 source:c:\users\haneen\documents\shahd\compiler\json-to-xml-compiler\main.cpp
+	<iostream>
+	<fstream>
+	<regex>
+	<vector>
+	<map>
+	<set>
+	<string>
+	<sstream>
+	<algorithm>
+	<stack>
+	<cctype>
+

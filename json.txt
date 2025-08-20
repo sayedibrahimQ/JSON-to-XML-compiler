@@ -1,3 +1,4 @@
 {
-  "callback": function() {}
+  "name":"farida",
+  "age":22
 }
