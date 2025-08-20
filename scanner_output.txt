@@ -1,16 +1,7 @@
 { {
 " "
-string name
+string callback
 " "
 : :
-" "
-string Farida
-" "
-, ,
-" "
-string age
-" "
-: :
-number 22
-} }
-ACCEPTED
+string function
+ERROR: Unknown token at line 2 near: (

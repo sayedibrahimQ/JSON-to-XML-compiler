@@ -391,10 +391,239 @@ public:
 };
 
 
+//parser
+
+struct Token
+{
+    string type;
+    string value;
+
+
+};
+vector<Token> tokens;
+int posCurrentToken=0;
+
+void loadTokens(const string& filename) {
+    ifstream file(filename);
+    if (!file) {
+        cerr << "Cannot open token file!" << endl;
+        return;
+    }
+
+    tokens.clear();
+    string type, value;
+    while (file >> type >> value) {
+        if (type == "ACCEPTED") break; 
+        tokens.push_back({type, value});
+    }
+    file.close();
+}
+
+
+
+Token CurrentToken()
+{
+    if(posCurrentToken < tokens.size())
+    {
+        return tokens[posCurrentToken];
+    }
+    return {"$ ","$"};
+}
+void match(string  expected)
+{
+    if(CurrentToken().type == expected)
+    {
+        cout<<"matched "<<expected<<"\n";
+        posCurrentToken++;
+    }
+    else
+    {
+        cout<< "Syntax Error: Expected token '" << expected << "' but found '" << CurrentToken().type 
+             << "' with value '" << CurrentToken().value << "'" << endl;
+        
+    }
+
+}
+void parseJson();
+void parseObject();
+void parseObjectT();
+void parseMembers();
+void parseMembersT();
+void parseMember();
+void parseArray();
+void parseArrayT();
+void parseValues();
+void parseValuesT();
+void parseValue();
+
+void parseString();
+void parseNumber();
+void parseBoolean();
+void parseNull();
+
+void parseJson()
+{
+    if(CurrentToken().type =="{")
+    {
+        parseObject();
+    }
+    else if(CurrentToken().type =="[")
+    {
+        parseArray();
+    }
+    else
+    {
+        cout<<"Error ,Json must start with { or [";
+        exit(1);
+    }
+}
+void parseObject()
+{
+    match("{");
+    parseObjectT();
+}
+
+void parseObjectT()
+{
+    if(CurrentToken().type== "}")
+    {
+        match("}");
+    }
+    else if(CurrentToken().type== "\"")
+    {
+        parseMembers();
+        match("}");
+    }
+    else{
+        cout<<"unexpected token must be } or \" "<<"\n";
+    }
+}
+
+
+void parseMembers()
+{
+    parseMember();
+    parseMembersT();
+}
+void parseMembersT()
+{
+    if(CurrentToken().type== ",")
+    {
+        match(",");
+        parseMember();
+        parseMembersT();
+    }
+    else{}
+
+}
+void parseMember()
+{
+    parseString();
+    match(":");
+    parseValue();
+}
+
+void parseArray()
+{
+    match("[");
+    parseArrayT();
+}
+void parseArrayT()
+{
+    if(CurrentToken().type== "]")
+    {
+        match("]");
+    }
+    else
+    {
+        parseValues();
+        match("]");
+    }
+
+}
+void parseValues()
+{
+    parseValue();
+    parseValuesT();
+}
+void parseValuesT()
+{
+    if(CurrentToken().type== ",")
+    {
+        match(",");
+        parseValue();
+        parseValuesT();
+    }
+    else{}
+
+}
+
+void parseValue()
+{
+    if(CurrentToken().type=="\"")
+    {
+        parseString();
+    }
+    else if(CurrentToken().type=="number")
+    {
+        parseNumber();
+    }
+    else if(CurrentToken().type=="{")
+    {
+        parseObject();
+    }
+    else if(CurrentToken().type=="[")
+    {
+        parseArray();
+    }
+    else if(CurrentToken().type=="null")
+    {
+        parseNull();
+    }
+    else if(CurrentToken().type=="true" || CurrentToken().type=="false" )
+    {
+        parseBoolean();
+    }
+    else{
+        cout<<"error token dont match";
+    }
+}
+void parseString()
+{
+    match("\"");
+    match("string");
+    match("\"");
+}
+void parseNumber()
+{
+    match("number");
+}
+void parseBoolean()
+{
+    if(CurrentToken().type=="true")
+    {
+        match("true");
+    }
+    else if(CurrentToken().type=="false")
+    {
+        match("false");
+    }
+
+}
+void parseNull()
+{
+    match("null");
+}
+
+
+
 
 int main() {
     vector<TokenRule> rules = loadTokenRules("tokens.txt");
     scanInput("json.txt", rules, "scanner_output.txt");
+
+    
+
 
     readGrammar("grammar.txt");
     computeFirst();
@@ -406,6 +635,19 @@ int main() {
     ParsingTable tab1("first.txt", "follow.txt", "grammar.txt");
     tab1.build_parsing_table("parse_table.txt");
     cout << "parsing table is done!" << endl;
+    cout<<"\n\n\n";
+
+    loadTokens("scanner_output.txt");
+    parseJson();
+    if (CurrentToken().type=="$") 
+    {
+        cout << "VALID JSON! All tokens matched." << endl;
+    }
+    else
+    {
+        cout << "INVALID JSON!  unexpected token." << endl;
+
+    }
 
     system("pause");
     return 0;
